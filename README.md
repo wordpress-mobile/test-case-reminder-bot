@@ -29,5 +29,6 @@ After completing the necessary steps in the guide you can use this command in th
 If you want server to reload automatically as you save the file  you can start the server as below instead of using `ruby server.rb`:
 
 > gem install rerun
+
 > rerun 'ruby server.rb'
 
