@@ -41,11 +41,11 @@ class GHAapp < Sinatra::Application
   # The GitHub App's identifier (type integer) set when registering an app.
   APP_IDENTIFIER = ENV['GITHUB_APP_IDENTIFIER']
 
-  TESTS_DIR = 'config/'
+  TESTS_DIR = 'test-suites/'
 
   TESTS_MAPPING_FILE = 'config/mapping.json' 
 
-  TESTS_REPO = 'pinarol/test-gh-app'
+  TESTS_REPO = 'wordpress-mobile/gutenberg-tests'
 
   # Turn on Sinatra's verbose logging during development
   configure :development do
@@ -66,11 +66,7 @@ class GHAapp < Sinatra::Application
   post '/event_handler' do
 
 	case request.env['HTTP_X_GITHUB_EVENT']
-#	when 'issues'
-#	  if @payload['action'] === 'opened'
-#	    handle_issue_opened_event(@payload)
-#	  end
-#	end
+
   when 'pull_request'
     if @payload['action'] === 'opened'
       handle_pullrequest_opened_event(@payload)
@@ -90,47 +86,62 @@ class GHAapp < Sinatra::Application
     # ADD YOUR HELPER METHODS HERE  #
     # # # # # # # # # # # # # # # # #
 
-    #https://github.com/pinarol/test-gh-app/blob/master/config/mapping.json
-
     def handle_pullrequest_opened_event(payload)
-      logger.debug 'A PR was opened!'
+      repo = payload['repository']['full_name']
+      pr_number = payload['pull_request']['number']
+
+      logger.debug('A PR was opened in repo: ' + repo.to_s + ', PR number: ' + pr_number.to_s)
+
+      mapping_json = fetch_mapping_json()
+      matched_files = find_matched_testcase_files(repo, pr_number, mapping_json)
+      test_content = create_test_content(matched_files)
+
+      if matched_files.count > 0
+        create_pull_request_review(repo, pr_number, test_content)
+      end
+    end
+
+    def fetch_mapping_json()
       mapping = Octokit.contents(TESTS_REPO, :path => TESTS_MAPPING_FILE)
       content = mapping['content']
-      logger.debug(content)
       plain = Base64.decode64(content)
-      logger.debug(plain)
-
       json = JSON.parse(plain)
-      logger.debug(json)
+    end
 
-      repo = payload['repository']['full_name']
-      number = payload['pull_request']['number']
-      files = @installation_client.pull_request_files(repo, number)
+    def create_pull_request_review(repo, pr_number, test_content)
+      options = { event: 'COMMENT', body: test_content }
+      @installation_client.create_pull_request_review(repo, pr_number, options)
+      logger.debug('Created pull request review:')
+      logger.debug(test_content)
+    end
 
+    def find_matched_testcase_files(repo, pr_number, mapping_json)
+      files = @installation_client.pull_request_files(repo, pr_number)
+      logger.debug('Starting to run regex phrases on file names from the PR.')
+      matched_files = []
       files.each { |file| puts 
         filename = file['filename']
         logger.debug('filename: ' + filename)
-        json.each { |item| puts
+        mapping_json.each { |item| puts
           regex = item['regex']
           logger.debug('regex: ' + regex)
           if regex.match(filename)
-            logger.debug('match!')
-            logger.debug(item['testFile'])
-            testFile = Octokit.contents(TESTS_REPO, :path => TESTS_DIR + item['testFile'])
-            testContent = Base64.decode64(testFile['content'])
-            options = { event: 'COMMENT', body: testContent }
-            @installation_client.create_pull_request_review(repo, number, options)
+            logger.debug('match! ' + item['testFile'])
+            matched_files << item['testFile']
           end
         }
       }
+      matched_files = matched_files.uniq
     end
 
-  	def handle_issue_opened_event(payload)
-  	  logger.debug 'An issue was opened!'
-      repo = payload['repository']['full_name']
-      issue_number = payload['issue']['number']
-      @installation_client.add_labels_to_an_issue(repo, issue_number, ['needs-response'])
-  	end
+    def create_test_content(matched_files) 
+      testContent = "Here are some suggested test cases for this PR. \n\n"
+      matched_files.each { |file| puts
+            testFile = Octokit.contents(TESTS_REPO, :path => TESTS_DIR + file)
+            testContent = testContent + Base64.decode64(testFile['content'])
+      }
+      testContent = testContent + "\n" + " If you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/gutenberg-tests/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/gutenberg-tests/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/gutenberg-tests/blob/master/config/mapping.json)."
+    end
 
     # Saves the raw payload and converts the payload to JSON format
     def get_payload_request(request)
