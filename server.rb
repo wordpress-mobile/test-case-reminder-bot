@@ -140,7 +140,7 @@ class GHAapp < Sinatra::Application
             testFile = Octokit.contents(TESTS_REPO, :path => TESTS_DIR + file)
             testContent = testContent + Base64.decode64(testFile['content'])
       }
-      testContent = testContent + "\n" + " If you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/gutenberg-tests/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/gutenberg-tests/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/gutenberg-tests/blob/master/config/mapping.json)."
+      testContent = testContent + "\n\n" + " If you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/gutenberg-tests/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/gutenberg-tests/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/gutenberg-tests/blob/master/config/mapping.json)."
     end
 
     # Saves the raw payload and converts the payload to JSON format
