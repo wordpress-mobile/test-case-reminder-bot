@@ -1,6 +1,8 @@
-# Gutenberg Tests - Reminder Bot
+# Test Case Reminder Bot
 
-A GitHub bot that drops a comment into the PR about what to test when specific files change in gutenberg repo. Test cases and configurations live in [gutenberg-tests](https://github.com/wordpress-mobile/gutenberg-tests) repo. This is just the server implementation.
+A GitHub bot that drops a comment into the PR about what to test when specific files change. The bot can work on every repo that it is installed, you just need to add related test-suites and `file <-> test-suite` mappings in the configuration [here](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json). Test suites and configurations live in [test-cases](https://github.com/wordpress-mobile/test-cases) repo. This is just the server implementation.
+
+![Screenshot](screenshot.png)
 
 ## Install
 
