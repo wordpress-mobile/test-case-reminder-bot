@@ -74,9 +74,9 @@ class GHAapp < Sinatra::Application
     if @payload['action'] === 'opened'
       handle_pullrequest_opened_event(@payload)
     end
-    if @payload['action'] === 'edited'
-      handle_pullrequest_opened_event(@payload)
-    end
+  #  if @payload['action'] === 'edited'
+  #    handle_pullrequest_opened_event(@payload)
+  #  end
   end
 
     200 # success status
