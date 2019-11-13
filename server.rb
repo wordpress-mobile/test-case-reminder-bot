@@ -52,6 +52,9 @@ class GHAapp < Sinatra::Application
     set :logging, Logger::DEBUG
   end
 
+  configure :production do
+    set :logging, Logger::DEBUG
+  end
 
   # Before each request to the `/event_handler` route
   before '/event_handler' do
