@@ -52,8 +52,11 @@ class GHAapp < Sinatra::Application
     set :logging, Logger::DEBUG
   end
 
+  # Turn on Sinatra's verbose logging if DEBUG=1 on production
   configure :production do
-    set :logging, Logger::DEBUG
+    if ENV['DEBUG'].to_i === 1
+      set :logging, Logger::DEBUG
+    end
   end
 
   # Before each request to the `/event_handler` route
@@ -74,9 +77,9 @@ class GHAapp < Sinatra::Application
     if @payload['action'] === 'opened'
       handle_pullrequest_opened_event(@payload)
     end
-    if @payload['action'] === 'edited'
-      handle_pullrequest_opened_event(@payload)
-    end
+  #  if @payload['action'] === 'edited'
+  #    handle_pullrequest_opened_event(@payload)
+  #  end
   end
 
     200 # success status
