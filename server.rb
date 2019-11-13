@@ -8,7 +8,7 @@ require 'time'        # Gets ISO 8601 representation of a Time object
 require 'logger'      # Logs debug statements
 require "base64"
 
-set :port, 3000
+set :port, ENV['PORT'].to_i
 set :bind, '0.0.0.0'
 
 
