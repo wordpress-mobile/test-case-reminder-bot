@@ -128,7 +128,7 @@ class GHAapp < Sinatra::Application
         mapping_json.each { |item| puts
           regex = item['regex']
           logger.debug('regex: ' + regex)
-          if regex.match(filename)
+          if regex.match?(filename)
             logger.debug('match! ' + item['testFile'])
             matched_files << item['testFile']
           end
