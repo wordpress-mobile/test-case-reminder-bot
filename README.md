@@ -40,11 +40,11 @@ Unit tests live in `unittest.rb`
 
 If you want to test potential changes to [mapping.json](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json) file you can first apply the changes to `test_mapping.json` living in this repo and test in your local as explained below.
 
-Checkout this repo
-Change `test_mapping.json`
-Change `unittests.rb` [this line](https://github.com/wordpress-mobile/test-case-reminder-bot/blob/e12c02305f31bf6c3c6d76f9f3d370c0b4703d3e/unittests.rb#L27) with the filenames you want to test with.
-Change assertions accordingly
+- Checkout this repo
+- Change `test_mapping.json`
+- Change `unittests.rb` [this line](https://github.com/wordpress-mobile/test-case-reminder-bot/blob/e12c02305f31bf6c3c6d76f9f3d370c0b4703d3e/unittests.rb#L27) with the filenames you want to test with.
+- Change assertions accordingly
 
-Run the below command to run them:
+Run below command to run unittests:
 
 > ruby unittests.rb
