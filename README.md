@@ -38,6 +38,13 @@ If you want server to reload automatically as you save the file  you can start t
 
 Unit tests live in `unittest.rb`
 
+If you want to test potential changes to [mapping.json](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json) file you use `test_mapping.json` to test first.
+
+Checkout this repo
+Change `test_mapping.json`
+Change `unittests.rb` [this line](https://github.com/wordpress-mobile/test-case-reminder-bot/blob/e12c02305f31bf6c3c6d76f9f3d370c0b4703d3e/unittests.rb#L27) with the filenames you want to test with.
+Change assertions accordingly
+
 Run the below command to run them:
 
 > ruby unittests.rb
