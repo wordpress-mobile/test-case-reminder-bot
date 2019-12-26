@@ -34,3 +34,10 @@ If you want server to reload automatically as you save the file  you can start t
 
 > rerun 'ruby server.rb'
 
+## Unit tests
+
+Unit tests live in `unittest.rb`
+
+Run the below command to run them:
+
+> ruby unittests.rb
