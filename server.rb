@@ -96,7 +96,7 @@ class GHAapp < Sinatra::Application
       logger.debug('A PR was opened in repo: ' + repo.to_s + ', PR number: ' + pr_number.to_s)
 
       mapping_json = fetch_mapping_json()
-      matched_files = find_matched_testcase_files(repo, pr_number, mapping_json)
+      matched_files = find_matched_testcase_files_from_pr(repo, pr_number, mapping_json)
       test_content = create_test_content(matched_files)
 
       if matched_files.count > 0
@@ -118,24 +118,28 @@ class GHAapp < Sinatra::Application
       logger.debug(test_content)
     end
 
-    def find_matched_testcase_files(repo, pr_number, mapping_json)
+    def find_matched_testcase_files_from_pr(repo, pr_number, mapping_json)
       files = @installation_client.pull_request_files(repo, pr_number)
+      matched_files = find_matched_testcase_files(files, mapping_json, logger)
+    end
+
+    def find_matched_testcase_files(files, mapping_json, logger)
       logger.debug('Starting to run regex phrases on file names from the PR.')
       matched_files = []
       files.each { |file| puts 
         filename = file['filename']
-        logger.debug('filename: ' + filename)
+        logger.debug('filename: ' + filename.to_s)
         mapping_json.each { |item| puts
-          regex = Regexp.new(item['regex'])
+          regex = Regexp.new(item['regex'].to_s)
           logger.debug('regex: ')
           logger.debug(regex)
           if regex.match?(filename)
-            logger.debug('match! ' + item['testFile'])
+            logger.debug('match! ' + item['testFile'].join(', '))
             matched_files << item['testFile']
           end
         }
       }
-      matched_files = matched_files.uniq
+      matched_files = matched_files.flatten.uniq
     end
 
     def create_test_content(matched_files) 
