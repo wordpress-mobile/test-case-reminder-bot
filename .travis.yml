@@ -1,0 +1,7 @@
+language: ruby
+
+before_script:
+  - bundle install
+
+script:
+  - ruby unittests.rb
