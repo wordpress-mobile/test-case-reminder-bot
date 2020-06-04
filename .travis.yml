@@ -1,5 +1,7 @@
 language: ruby
 
-before_script: bundle
+before_script:
+  - gem env
+  - gem list
 
 script: ruby unittests.rb
