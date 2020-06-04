@@ -1,5 +1,5 @@
 language: ruby
 
-before_script: bundle install
+before_script: bundle
 
 script: ruby unittests.rb
