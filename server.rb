@@ -1,9 +1,9 @@
-# require 'sinatra'
-# require 'octokit'
-# require 'dotenv/load' # Manages environment variables
+require 'sinatra'
+require 'octokit'
+require 'dotenv/load' # Manages environment variables
 require 'json'
 require 'openssl'     # Verifies the webhook signature
-# require 'jwt'         # Authenticates a GitHub App
+require 'jwt'         # Authenticates a GitHub App
 require 'time'        # Gets ISO 8601 representation of a Time object
 require 'logger'      # Logs debug statements
 require "base64"
