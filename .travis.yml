@@ -1,0 +1,8 @@
+language: ruby
+
+script: ruby unittests.rb
+
+# whitelist branches for the "push" build check
+branches:
+  only:
+    - master

@@ -11,6 +11,7 @@ GEM
     mustermann (1.0.3)
     octokit (4.13.0)
       sawyer (~> 0.8.0, >= 0.5.3)
+    power_assert (1.2.0)
     public_suffix (3.0.3)
     rack (2.0.6)
     rack-protection (2.0.4)
@@ -23,6 +24,8 @@ GEM
       rack (~> 2.0)
       rack-protection (= 2.0.4)
       tilt (~> 2.0)
+    test-unit (3.3.5)
+      power_assert
     tilt (2.0.8)
 
 PLATFORMS
@@ -33,6 +36,7 @@ DEPENDENCIES
   jwt (~> 2.1)
   octokit (~> 4.0)
   sinatra (~> 2.0)
+  test-unit
 
 BUNDLED WITH
    1.17.1
