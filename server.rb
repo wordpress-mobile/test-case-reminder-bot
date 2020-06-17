@@ -1,9 +1,9 @@
-require 'sinatra'
-require 'octokit'
-require 'dotenv/load' # Manages environment variables
+# require 'sinatra'
+# require 'octokit'
+# require 'dotenv/load' # Manages environment variables
 require 'json'
 require 'openssl'     # Verifies the webhook signature
-require 'jwt'         # Authenticates a GitHub App
+# require 'jwt'         # Authenticates a GitHub App
 require 'time'        # Gets ISO 8601 representation of a Time object
 require 'logger'      # Logs debug statements
 require "base64"
@@ -41,10 +41,9 @@ class GHAapp < Sinatra::Application
   # The GitHub App's identifier (type integer) set when registering an app.
   APP_IDENTIFIER = ENV['GITHUB_APP_IDENTIFIER']
 
+  # Default configuration
   TESTS_DIR = 'test-suites/'
-
   TESTS_MAPPING_FILE = 'config/mapping.json' 
-
   TESTS_REPO = 'wordpress-mobile/test-cases'
 
   # Turn on Sinatra's verbose logging during development
@@ -74,9 +73,9 @@ class GHAapp < Sinatra::Application
     if @payload['action'] === 'opened'
       handle_pullrequest_opened_event(@payload)
     end
-  #  if @payload['action'] === 'edited'
-  #    handle_pullrequest_opened_event(@payload)
-  #  end
+    if @payload['action'] === 'edited'
+     handle_pullrequest_opened_event(@payload)
+   end
   end
 
     200 # success status
@@ -95,6 +94,7 @@ class GHAapp < Sinatra::Application
 
       logger.debug('A PR was opened in repo: ' + repo.to_s + ', PR number: ' + pr_number.to_s)
 
+      fetch_config(repo)
       mapping_json = fetch_mapping_json()
       matched_files = find_matched_testcase_files_from_pr(repo, pr_number, mapping_json)
       test_content = create_test_content(matched_files)
@@ -105,10 +105,38 @@ class GHAapp < Sinatra::Application
     end
 
     def fetch_mapping_json()
-      mapping = Octokit.contents(TESTS_REPO, :path => TESTS_MAPPING_FILE)
+      mapping = Octokit.contents(@config[:tests_repo], :path => @config[:mapping_file])
       content = mapping['content']
       plain = Base64.decode64(content)
       json = JSON.parse(plain)
+    end
+
+    def default_config()
+      {
+        tests_dir: 'test-suites/',
+        mapping_file: 'config/mapping.json',
+        tests_repo: 'wordpress-mobile/test-cases'
+      }
+    end
+
+    def fetch_config(repo_name)
+      config_file = '.github/test-case-reminder.json'
+      @config = default_config
+      
+      begin
+        response = Octokit.contents(repo_name, :path => config_file)
+      rescue => exception
+        logger.debug('No config file found. Falling back to default values')
+        return;
+      end
+
+      content = response['content']
+      plain = Base64.decode64(content)
+      json = JSON.parse(plain, {symbolize_names: true})
+
+      @config.each do |key, value|
+        @config[key] = json[key] if ( json[key] )
+      end
     end
 
     def create_pull_request_review(repo, pr_number, test_content)
@@ -126,10 +154,10 @@ class GHAapp < Sinatra::Application
     def find_matched_testcase_files(files, mapping_json, logger)
       logger.debug('Starting to run regex phrases on file names from the PR.')
       matched_files = []
-      files.each { |file| puts 
+      files.each { |file|
         filename = file['filename']
         logger.debug('filename: ' + filename.to_s)
-        mapping_json.each { |item| puts
+        mapping_json.each { |item|
           regex = Regexp.new(item['regex'].to_s)
           logger.debug('regex: ')
           logger.debug(regex)
@@ -144,8 +172,8 @@ class GHAapp < Sinatra::Application
 
     def create_test_content(matched_files) 
       testContent = "Here are some suggested test cases for this PR. \n\n"
-      matched_files.each { |file| puts
-            testFile = Octokit.contents(TESTS_REPO, :path => TESTS_DIR + file)
+      matched_files.each { |file|
+            testFile = Octokit.contents(@config[:tests_repo], :path => @config[:tests_dir] + file)
             testContent = testContent + Base64.decode64(testFile['content'])
       }
       testContent = testContent + "\n\n" + " If you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/test-cases/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json).\n\n If you are a beginner in mobile platforms follow [build instructions](https://github.com/wordpress-mobile/test-cases/blob/master/README.md#build-instructions)."
@@ -192,6 +220,8 @@ class GHAapp < Sinatra::Application
     # Instantiate an Octokit client, authenticated as an installation of a
     # GitHub App, to run API operations.
     def authenticate_installation(payload)
+      halt 401 if !payload['installation'] || !payload['installation']['id']
+
       @installation_id = payload['installation']['id']
       @installation_token = @app_client.create_app_installation_access_token(@installation_id)[:token]
       @installation_client = Octokit::Client.new(bearer_token: @installation_token)
