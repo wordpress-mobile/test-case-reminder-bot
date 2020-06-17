@@ -20,18 +20,18 @@ module ApplicationHelper
 
     logger.debug('A PR was opened in repo: ' + repo.to_s + ', PR number: ' + pr_number.to_s)
 
-    fetch_config(repo, logger)
-    mapping_json = fetch_mapping_json()
+    config = fetch_config(repo, logger)
+    mapping_json = fetch_mapping_json( config )
     matched_files = find_matched_testcase_files_from_pr(repo, pr_number, mapping_json)
-    test_content = create_test_content(matched_files)
+    test_content = create_test_content(matched_files, config)
 
     if matched_files.count > 0
       create_pull_request_review(repo, pr_number, test_content)
     end
   end
 
-  def fetch_mapping_json()
-    mapping = Octokit.contents(@config[:tests_repo], :path => @config[:mapping_file])
+  def fetch_mapping_json(config)
+    mapping = Octokit.contents(config[:tests_repo], :path => config[:mapping_file])
     content = mapping['content']
     plain = Base64.decode64(content)
     json = JSON.parse(plain)
@@ -47,13 +47,13 @@ module ApplicationHelper
 
   def fetch_config(repo_name, logger)
     config_file = '.github/test-case-reminder.json'
-    @config = default_config
+    config = default_config
     
     begin
       response = Octokit.contents(repo_name, :path => config_file)
     rescue => exception
       logger.debug('No config file found. Falling back to default values')
-      return;
+      return config;
     end
 
     content = response[:content]
@@ -61,8 +61,8 @@ module ApplicationHelper
     json = JSON.parse(plain, {symbolize_names: true})
     logger.debug("Found a config file for #{ repo_name }: #{ json }")
 
-    @config.each do |key, value|
-      @config[key] = json[key] if ( json[key] )
+    config.each do |key, value|
+      config[key] = json[key] if ( json[key] )
     end
   end
 
@@ -97,10 +97,10 @@ module ApplicationHelper
     matched_files = matched_files.flatten.uniq
   end
 
-  def create_test_content(matched_files) 
+  def create_test_content(matched_files, config) 
     testContent = "Here are some suggested test cases for this PR. \n\n"
     matched_files.each { |file| puts
-          testFile = Octokit.contents(@config[:tests_repo], :path => @config[:tests_dir] + file)
+          testFile = Octokit.contents(config[:tests_repo], :path => config[:tests_dir] + file)
           testContent = testContent + Base64.decode64(testFile['content'])
     }
     testContent = testContent + "\n\n" + " If you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/test-cases/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json).\n\n If you are a beginner in mobile platforms follow [build instructions](https://github.com/wordpress-mobile/test-cases/blob/master/README.md#build-instructions)."
