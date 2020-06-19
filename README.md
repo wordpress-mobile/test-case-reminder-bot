@@ -33,8 +33,8 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 ### Set environment variables
 
 1. Create a copy of the `.env-example` file called `.env`.
-1. Create a test app with the following permissions: "Read access to code", "Read access to metadata", "Read and write access to pull requests"
-1. Add your GitHub App's private key, app ID, and webhook secret to the `.env` file.
+2. Create a test app with the following permissions: "Read access to code", "Read access to metadata", "Read and write access to pull requests"
+3. Add your GitHub App's private key, app ID, and webhook secret to the `.env` file.
 
 ### Run the server
 
