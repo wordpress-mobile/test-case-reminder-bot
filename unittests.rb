@@ -63,7 +63,8 @@ class TestAdd < Test::Unit::TestCase
         expected_config = {
             tests_dir: 'test-suites/',
             mapping_file: 'config/mapping.json',
-            tests_repo: 'wordpress-mobile/test-cases'
+            tests_repo: 'wordpress-mobile/test-cases',
+            comment_footer: "\n\nIf you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/test-cases/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json).\n\n If you are a beginner in mobile platforms follow [build instructions](https://github.com/wordpress-mobile/test-cases/blob/master/README.md#build-instructions).",
           }
         assert_equal(expected_config, default_config)
     end
@@ -72,7 +73,12 @@ class TestAdd < Test::Unit::TestCase
         ghApp = DummyClass.new()
       	logger = Logger.new(STDOUT)
 
-        expected_config = {tests_dir: 'tests_dir', mapping_file: 'mapping_file', tests_repo: 'tests_repo'}
+        expected_config = {
+            tests_dir: 'tests_dir',
+            mapping_file: 'mapping_file',
+            tests_repo: 'tests_repo',
+            comment_footer: 'comment_footer'
+        }
         content = Base64.encode64(expected_config.to_json)
 
         any_instance_of(Octokit::Client) do |klass|
