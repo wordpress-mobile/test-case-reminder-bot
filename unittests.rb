@@ -1,19 +1,24 @@
 require 'bundler/setup'
 
-require 'test/unit'
-require './server.rb'
 require 'octokit'
 require "base64"
 require 'json'
 require 'logger' 
 require 'ostruct'
+require 'test/unit'
+require "test/unit/rr"
 
+require './server.rb'
+require './application_helper.rb'
 
 ENV["RAILS_ENV"] = "test"
 
+class DummyClass
+    include ApplicationHelper
+end
+
 # Run 'ruby unittests.rb'
 class TestAdd < Test::Unit::TestCase
-
     def test_match
 
       	logger = Logger.new(STDOUT)
@@ -50,6 +55,46 @@ class TestAdd < Test::Unit::TestCase
 		assert test_suites.include?("gutenberg/multi-block-media-upload.md")
 		assert test_suites.include?("gutenberg/img-upload-processor.md")
 		assert test_suites.include?("gutenberg/video-upload-processor.md")
+    end
+
+    def test_default_config
+    	ghApp = GHAapp.new()
+        default_config = ghApp.helpers.default_config()
+        expected_config = {
+            tests_dir: 'test-suites/',
+            mapping_file: 'config/mapping.json',
+            tests_repo: 'wordpress-mobile/test-cases'
+          }
+        assert_equal(expected_config, default_config)
+    end
+
+    def test_fetch_repo_config
+        ghApp = DummyClass.new()
+      	logger = Logger.new(STDOUT)
+
+        expected_config = {tests_dir: 'tests_dir', mapping_file: 'mapping_file', tests_repo: 'tests_repo'}
+        content = Base64.encode64(expected_config.to_json)
+
+        any_instance_of(Octokit::Client) do |klass|
+            stub(klass).contents { { content: content } }
+        end
+
+        config = ghApp.fetch_config('test-repo', logger)
+        assert_equal(expected_config, config)
+    end
+
+    def test_fetch_default_config
+        ghApp = DummyClass.new()
+      	logger = Logger.new(STDOUT)
+
+        default_config = ghApp.default_config()
+
+        any_instance_of(Octokit::Client) do |klass|
+            stub(klass).contents { throw Exception.new() }
+        end
+
+        config = ghApp.fetch_config('test-repo', logger)
+        assert_equal(default_config, config)
     end
 end
 
