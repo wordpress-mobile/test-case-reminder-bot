@@ -13,6 +13,7 @@ It is possible to override default configuration by adding a `.github/test-case-
 - `tests_repo` - Repository with test suites and `mapping.json`
 - `tests_dir` - Path to test-suites directory
 - `mapping_file` - Path to `mapping.json` file
+- `comment_footer` - Markdown-formatted text that will be added _after_ list of test cases. Useful for suggestions on how to improve/extend existing test cases
 
 Example config:
 
@@ -20,7 +21,8 @@ Example config:
 {
   "tests_repo": "brbrr/jetpack",
   "tests_dir": "docs/regression-checklist/test-suites/",
-  "mapping_file": "docs/regression-checklist/mapping.json"
+  "mapping_file": "docs/regression-checklist/mapping.json",
+  "comment_footer": "Text explaining how to extend and improve existing test suites"
 }
 ```
 

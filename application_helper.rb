@@ -9,11 +9,6 @@ module ApplicationHelper
   # The GitHub App's identifier (type integer) set when registering an app.
   APP_IDENTIFIER = ENV['GITHUB_APP_IDENTIFIER']
 
-  # Default configuration
-  TESTS_DIR = 'test-suites/'
-  TESTS_MAPPING_FILE = 'config/mapping.json' 
-  TESTS_REPO = 'wordpress-mobile/test-cases'
-  
   def handle_pullrequest_opened_event(payload)
     repo = payload['repository']['full_name']
     pr_number = payload['pull_request']['number']
@@ -41,7 +36,8 @@ module ApplicationHelper
     {
       tests_dir: 'test-suites/',
       mapping_file: 'config/mapping.json',
-      tests_repo: 'wordpress-mobile/test-cases'
+      tests_repo: 'wordpress-mobile/test-cases',
+      comment_footer: "\n\nIf you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/test-cases/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json).\n\n If you are a beginner in mobile platforms follow [build instructions](https://github.com/wordpress-mobile/test-cases/blob/master/README.md#build-instructions).",
     }
   end
 
@@ -103,7 +99,7 @@ module ApplicationHelper
           testFile = Octokit.contents(config[:tests_repo], :path => config[:tests_dir] + file)
           testContent = testContent + Base64.decode64(testFile['content'])
     }
-    testContent = testContent + "\n\n" + " If you think that suggestions should be improved please edit the configuration file [here](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json). You can also modify/add [test-suites](https://github.com/wordpress-mobile/test-cases/tree/master/test-suites) to be used in the [configuration](https://github.com/wordpress-mobile/test-cases/blob/master/config/mapping.json).\n\n If you are a beginner in mobile platforms follow [build instructions](https://github.com/wordpress-mobile/test-cases/blob/master/README.md#build-instructions)."
+    testContent = testContent + config[:comment_footer]
   end
 
   # Saves the raw payload and converts the payload to JSON format
